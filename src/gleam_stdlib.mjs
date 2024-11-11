@@ -283,31 +283,61 @@ export function split_once(haystack, needle) {
   }
 }
 
-const unicode_whitespaces = [
-  "\u0020", // Space
-  "\u0009", // Horizontal tab
-  "\u000A", // Line feed
-  "\u000B", // Vertical tab
-  "\u000C", // Form feed
-  "\u000D", // Carriage return
-  "\u0085", // Next line
-  "\u2028", // Line separator
-  "\u2029", // Paragraph separator
-].join("");
-
-const left_trim_regex = new RegExp(`^([${unicode_whitespaces}]*)`, "g");
-const right_trim_regex = new RegExp(`([${unicode_whitespaces}]*)$`, "g");
+function isUnicodeWhitespace(c) {
+  return (
+    c === "\u0020" || // Space
+    c === "\u0009" || // Horizontal tab
+    c === "\u000A" || // Line feed
+    c === "\u000B" || // Vertical tab
+    c === "\u000C" || // Form feed
+    c === "\u000D" || // Carriage return
+    c === "\u0085" || // Next line
+    c === "\u2028" || // Line separator
+    c === "\u2029" // Paragraph separator
+  );
+}
 
 export function trim(string) {
-  return trim_start(trim_end(string));
+  const start_index = find_non_whitespace_char(string);
+
+  let end_index = rfind_non_whitespace_char(string) + 1;
+  if (end_index < start_index) {
+    end_index = start_index;
+  }
+
+  return string.substring(start_index, end_index);
 }
 
 export function trim_start(string) {
-  return string.replace(left_trim_regex, "");
+  return string.substring(find_non_whitespace_char(string));
 }
 
 export function trim_end(string) {
-  return string.replace(right_trim_regex, "");
+  return string.substring(0, rfind_non_whitespace_char(string) + 1);
+}
+
+function find_non_whitespace_char(string) {
+  let i = 0;
+
+  for (; i < string.length; i++) {
+    if (!isUnicodeWhitespace(string[i])) {
+      break;
+    }
+  }
+
+  return i;
+}
+
+function rfind_non_whitespace_char(string) {
+  let i = string.length - 1;
+
+  for (; i >= 0; i--) {
+    if (!isUnicodeWhitespace(string[i])) {
+      break;
+    }
+  }
+
+  return i;
 }
 
 export function bit_array_from_string(string) {

@@ -9,6 +9,8 @@
   `trim_right` functions, which have been deprecated.
 - The `result.nil_error` function has been deprecated in favour of
   `result.replace_error`.
+- The performance of `string.trim`, `string.trim_start`, and `string.trim_end`
+  has been improved on JavaScript.
 
 ## v0.41.0 - 2024-10-31
 
