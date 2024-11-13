@@ -792,12 +792,12 @@ function withoutCollision(root, key) {
 /**
  * @template K,V
  * @param {undefined | Node<K,V>} root
- * @param {(value:V,key:K)=>void} fn
- * @returns {void}
+ * @param {(value:V,key:K)=>boolean|void} fn
+ * @returns {boolean}
  */
 function forEach(root, fn) {
   if (root === undefined) {
-    return;
+    return true;
   }
   const items = root.array;
   const size = items.length;
@@ -807,11 +807,16 @@ function forEach(root, fn) {
       continue;
     }
     if (item.type === ENTRY) {
-      fn(item.v, item.k);
+      if (fn(item.v, item.k) === false) {
+        return false;
+      }
       continue;
     }
-    forEach(item, fn);
+    if (forEach(item, fn) === false) {
+      return false;
+    }
   }
+  return true;
 }
 /**
  * Extra wrapper to keep track of Dict size and clean up the API
@@ -923,15 +928,18 @@ export default class Dict {
     }
     /** @type [K,V][] */
     const result = [];
-    this.forEach((v, k) => result.push([k, v]));
+    this.forEach((v, k) => {
+      result.push([k, v]);
+    });
     return result;
   }
   /**
    *
-   * @param {(val:V,key:K)=>void} fn
+   * @param {(val:V,key:K)=>boolean|void} fn
+   * @returns {boolean}
    */
   forEach(fn) {
-    forEach(this.root, fn);
+    return forEach(this.root, fn);
   }
   hashCode() {
     let h = 0;
@@ -948,10 +956,7 @@ export default class Dict {
     if (!(o instanceof Dict) || this.size !== o.size) {
       return false;
     }
-    let equal = true;
-    this.forEach((v, k) => {
-      equal = equal && isEqual(o.get(k, !v), v);
-    });
-    return equal;
+
+    return this.forEach((v, k) => isEqual(o.get(k, !v), v));
   }
 }

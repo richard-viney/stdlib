@@ -9,6 +9,8 @@
   `trim_right` functions, which have been deprecated.
 - The `result.nil_error` function has been deprecated in favour of
   `result.replace_error`.
+- Comparing two `Dict`s for equality has been optimised on the JavaScript
+  target.
 
 ## v0.41.0 - 2024-10-31
 
